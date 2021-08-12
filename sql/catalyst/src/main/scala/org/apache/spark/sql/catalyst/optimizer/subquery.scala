@@ -722,6 +722,8 @@ object OptimizeOneRowRelationSubquery extends Rule[LogicalPlan] {
     def unapply(plan: LogicalPlan): Option[Seq[NamedExpression]] = {
       CollapseProject(EliminateSubqueryAliases(plan)) match {
         case Project(projectList, _: OneRowRelation) => Some(stripOuterReferences(projectList))
+        case Aggregate(_, aggregateExpressions, _: OneRowRelation) =>
+          Some(stripOuterReferences(aggregateExpressions))
         case _ => None
       }
     }

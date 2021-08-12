@@ -1902,4 +1902,13 @@ class SubquerySuite extends QueryTest with SharedSparkSession with AdaptiveSpark
       assert(exchanges.size === 1)
     }
   }
+
+  test("SPARK-35554: Support Aggregate to host outer query references") {
+    withTempView("t") {
+      Seq((0, 1), (1, 2)).toDF("c1", "c2").createOrReplaceTempView("t")
+      checkAnswer(
+        sql("SELECT (SELECT SUM(c1)), (SELECT SUM(c2)) FROM t"),
+        Row(1, 3) :: Nil)
+    }
+  }
 }

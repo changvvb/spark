@@ -294,12 +294,12 @@ trait CheckAnalysis extends PredicateHelper with LookupCatalog {
                     s"nor is it an aggregate function. " +
                     "Add to group by or wrap in first() (or first_value) if you don't care " +
                     "which value you get.")
-              case s: ScalarSubquery
-                  if s.children.nonEmpty && !groupingExprs.exists(_.semanticEquals(s)) =>
-                failAnalysis(s"Correlated scalar subquery '${s.sql}' is neither " +
-                  "present in the group by, nor in an aggregate function. Add it to group by " +
-                  "using ordinal position or wrap it in first() (or first_value) if you don't " +
-                  "care which value you get.")
+//              case s: ScalarSubquery
+//                  if s.children.nonEmpty && !groupingExprs.exists(_.semanticEquals(s)) =>
+//                failAnalysis(s"Correlated scalar subquery '${s.sql}' is neither " +
+//                  "present in the group by, nor in an aggregate function. Add it to group by " +
+//                  "using ordinal position or wrap it in first() (or first_value) if you don't " +
+//                  "care which value you get.")
               case e if groupingExprs.exists(_.semanticEquals(e)) => // OK
               case e => e.children.foreach(checkValidAggregateExpression)
             }
@@ -719,6 +719,7 @@ trait CheckAnalysis extends PredicateHelper with LookupCatalog {
     def canHostOuter(plan: LogicalPlan): Boolean = plan match {
       case _: Filter => true
       case _: Project => isScalarOrLateral && SQLConf.get.decorrelateInnerQueryEnabled
+      case _: Aggregate => isScalarOrLateral
       case _ => false
     }
 
