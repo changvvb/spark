@@ -33,4 +33,14 @@ case class NonEmptyNamespaceException(
       messageParameters = Map("namespace" -> quoted(namespace), "details" -> details)) {
 
   def this(namespace: Array[String]) = this(namespace, "", None)
+
+  // Scala 2 does not generate `copy` for a case class that inherits one, but Scala 3 does, with
+  // default arguments that clash with the ones of `AnalysisException.copy`. Defining a `copy`
+  // here, without default arguments, keeps Scala 3 from generating it.
+  def copy(
+      namespace: Array[String],
+      details: String,
+      cause: Option[Throwable]): NonEmptyNamespaceException = {
+    NonEmptyNamespaceException(namespace, details, cause)
+  }
 }

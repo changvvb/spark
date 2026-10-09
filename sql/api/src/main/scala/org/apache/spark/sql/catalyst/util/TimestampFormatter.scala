@@ -632,11 +632,12 @@ class FractionTimestampFormatter(zoneId: ZoneId)
       formatted.getChars(0, formatted.length, buf, 0)
       buf(formatted.length) = '.'
       var i = totalLen
-      do {
+      while ({
         i -= 1
         buf(i) = ('0' + (nanos % 10)).toChar
         nanos /= 10
-      } while (i > fracOffset)
+        i > fracOffset
+      }) ()
       new String(buf)
     }
   }

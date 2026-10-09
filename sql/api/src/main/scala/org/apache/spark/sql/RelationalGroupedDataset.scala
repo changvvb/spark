@@ -16,8 +16,6 @@
  */
 package org.apache.spark.sql
 
-import java.util
-
 import scala.jdk.CollectionConverters._
 
 import org.apache.spark.annotation.Stable
@@ -49,7 +47,7 @@ abstract class RelationalGroupedDataset {
    */
   private def toAggCol(colAndMethod: (String, String)): Column = {
     val col = df.col(colAndMethod._1)
-    colAndMethod._2.toLowerCase(util.Locale.ROOT) match {
+    colAndMethod._2.toLowerCase(java.util.Locale.ROOT) match {
       case "avg" | "average" | "mean" => functions.avg(col)
       case "stddev" | "std" => functions.stddev(col)
       case "count" | "size" => functions.count(col)
@@ -119,7 +117,7 @@ abstract class RelationalGroupedDataset {
    *
    * @since 1.3.0
    */
-  def agg(exprs: util.Map[String, String]): DataFrame = {
+  def agg(exprs: java.util.Map[String, String]): DataFrame = {
     agg(exprs.asScala.toMap)
   }
 
@@ -296,7 +294,7 @@ abstract class RelationalGroupedDataset {
    *   List of values that will be translated to columns in the output DataFrame.
    * @since 1.6.0
    */
-  def pivot(pivotColumn: String, values: util.List[Any]): RelationalGroupedDataset =
+  def pivot(pivotColumn: String, values: java.util.List[Any]): RelationalGroupedDataset =
     pivot(df.col(pivotColumn), values)
 
   /**
@@ -313,7 +311,7 @@ abstract class RelationalGroupedDataset {
    *   List of values that will be translated to columns in the output DataFrame.
    * @since 2.4.0
    */
-  def pivot(pivotColumn: Column, values: util.List[Any]): RelationalGroupedDataset =
+  def pivot(pivotColumn: Column, values: java.util.List[Any]): RelationalGroupedDataset =
     pivot(pivotColumn, values.asScala.toSeq)
 
   /**

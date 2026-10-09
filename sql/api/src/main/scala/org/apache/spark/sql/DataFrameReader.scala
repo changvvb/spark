@@ -16,8 +16,6 @@
  */
 package org.apache.spark.sql
 
-import java.util
-
 import scala.jdk.CollectionConverters._
 
 import org.apache.spark.annotation.Stable
@@ -142,7 +140,7 @@ abstract class DataFrameReader {
    *
    * @since 1.4.0
    */
-  def options(opts: util.Map[String, String]): this.type = options(opts.asScala)
+  def options(opts: java.util.Map[String, String]): this.type = options(opts.asScala)
 
   /**
    * Loads input in as a `DataFrame`, for data sources that don't require a path (e.g. external
@@ -180,7 +178,7 @@ abstract class DataFrameReader {
    *
    * @since 1.4.0
    */
-  def jdbc(url: String, table: String, properties: util.Properties): DataFrame = {
+  def jdbc(url: String, table: String, properties: java.util.Properties): DataFrame = {
     assertNoSpecifiedSchema("jdbc")
     // properties should override settings in extraOptions.
     this.extraOptions ++= properties.asScala
@@ -224,7 +222,7 @@ abstract class DataFrameReader {
       lowerBound: Long,
       upperBound: Long,
       numPartitions: Int,
-      connectionProperties: util.Properties): DataFrame = {
+      connectionProperties: java.util.Properties): DataFrame = {
     // columnName, lowerBound, upperBound and numPartitions override settings in extraOptions.
     this.extraOptions ++= Map(
       "partitionColumn" -> columnName,
@@ -261,7 +259,7 @@ abstract class DataFrameReader {
       url: String,
       table: String,
       predicates: Array[String],
-      connectionProperties: util.Properties): DataFrame
+      connectionProperties: java.util.Properties): DataFrame
 
   /**
    * Loads a JSON file and returns the results as a `DataFrame`.

@@ -16,8 +16,6 @@
  */
 package org.apache.spark.sql
 
-import java.util
-
 import org.apache.spark.annotation.Experimental
 import org.apache.spark.sql.catalyst.analysis.{CannotReplaceMissingTableException, NoSuchTableException, TableAlreadyExistsException}
 
@@ -63,7 +61,7 @@ abstract class DataFrameWriterV2[T] extends CreateTableWriter[T] {
   override def options(options: scala.collection.Map[String, String]): this.type
 
   /** @inheritdoc */
-  override def options(options: util.Map[String, String]): this.type
+  override def options(options: java.util.Map[String, String]): this.type
 
   /** @inheritdoc */
   override def tableProperty(property: String, value: String): this.type

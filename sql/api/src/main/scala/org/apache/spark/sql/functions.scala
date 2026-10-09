@@ -20,13 +20,13 @@ package org.apache.spark.sql
 import java.util.Collections
 
 import scala.jdk.CollectionConverters._
-import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
 
 import org.apache.spark.annotation.Stable
 import org.apache.spark.sql.api.java._
-import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.PrimitiveLongEncoder
+import org.apache.spark.sql.catalyst.encoders.EncoderTag
+import org.apache.spark.sql.catalyst.encoders.EncoderTag.TypeTag
 import org.apache.spark.sql.errors.CompilationErrors
 import org.apache.spark.sql.expressions.{Aggregator, SparkUserDefinedFunction, UserDefinedAggregator, UserDefinedFunction}
 import org.apache.spark.sql.internal.{SqlApiConf, ToScalaUDF}
@@ -170,7 +170,7 @@ object functions {
       case c: Column => c
       case s: Symbol => new ColumnName(s.name)
       case _ =>
-        val dataType = Try(ScalaReflection.schemaFor[T].dataType).toOption
+        val dataType = Try(EncoderTag.encoderFor[T].dataType).toOption
         Column(internal.Literal(literal, dataType))
     }
   }
@@ -18034,7 +18034,7 @@ object functions {
    *   The input encoder is inferred from the input type IN.
    */
   def udaf[IN: TypeTag, BUF, OUT](agg: Aggregator[IN, BUF, OUT]): UserDefinedFunction = {
-    udaf(agg, ScalaReflection.encoderFor[IN])
+    udaf(agg, EncoderTag.encoderFor[IN])
   }
 
   /**

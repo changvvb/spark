@@ -16,8 +16,6 @@
  */
 package org.apache.spark.sql
 
-import java.util
-
 import scala.jdk.CollectionConverters._
 import scala.reflect.runtime.universe.TypeTag
 
@@ -1568,7 +1566,7 @@ abstract class Dataset[T] extends Serializable {
    * @group untypedrel
    * @since 2.0.0
    */
-  def agg(exprs: util.Map[String, String]): DataFrame = groupBy().agg(exprs)
+  def agg(exprs: java.util.Map[String, String]): DataFrame = groupBy().agg(exprs)
 
   /**
    * Aggregates on the entire Dataset without groups.
@@ -2228,7 +2226,7 @@ abstract class Dataset[T] extends Serializable {
    * @group typedrel
    * @since 2.0.0
    */
-  def randomSplitAsList(weights: Array[Double], seed: Long): util.List[Dataset[T]]
+  def randomSplitAsList(weights: Array[Double], seed: Long): java.util.List[Dataset[T]]
 
   /**
    * Randomly splits this Dataset with the provided weights.
@@ -2338,7 +2336,7 @@ abstract class Dataset[T] extends Serializable {
    * @group untypedrel
    * @since 3.3.0
    */
-  def withColumns(colsMap: util.Map[String, Column]): DataFrame = withColumns(
+  def withColumns(colsMap: java.util.Map[String, Column]): DataFrame = withColumns(
     colsMap.asScala.toMap)
 
   /**
@@ -2410,7 +2408,7 @@ abstract class Dataset[T] extends Serializable {
    * @group untypedrel
    * @since 3.4.0
    */
-  def withColumnsRenamed(colsMap: util.Map[String, String]): DataFrame =
+  def withColumnsRenamed(colsMap: java.util.Map[String, String]): DataFrame =
     withColumnsRenamed(colsMap.asScala.toMap)
 
   protected[spark] def withColumnsRenamed(
@@ -2958,7 +2956,7 @@ abstract class Dataset[T] extends Serializable {
    * @group action
    * @since 1.6.0
    */
-  def takeAsList(n: Int): util.List[T] = util.Arrays.asList(take(n): _*)
+  def takeAsList(n: Int): java.util.List[T] = java.util.Arrays.asList(take(n): _*)
 
   /**
    * Returns an array that contains all rows in this Dataset.
@@ -2982,7 +2980,7 @@ abstract class Dataset[T] extends Serializable {
    * @group action
    * @since 1.6.0
    */
-  def collectAsList(): util.List[T]
+  def collectAsList(): java.util.List[T]
 
   /**
    * Returns an iterator that contains all rows in this Dataset.
@@ -2996,7 +2994,7 @@ abstract class Dataset[T] extends Serializable {
    * @group action
    * @since 2.0.0
    */
-  def toLocalIterator(): util.Iterator[T]
+  def toLocalIterator(): java.util.Iterator[T]
 
   /**
    * Returns the number of rows in the Dataset.

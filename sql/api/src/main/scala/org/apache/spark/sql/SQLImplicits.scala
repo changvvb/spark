@@ -19,12 +19,11 @@ package org.apache.spark.sql
 import scala.collection.Map
 import scala.language.implicitConversions
 import scala.reflect.classTag
-import scala.reflect.runtime.universe.TypeTag
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
+import org.apache.spark.sql.catalyst.encoders.{AgnosticEncoder, EncoderTag}
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders._
+import org.apache.spark.sql.catalyst.encoders.EncoderTag.TypeTag
 
 /**
  * A collection of implicit methods for converting common Scala objects into
@@ -138,7 +137,7 @@ trait EncoderImplicits extends LowPrioritySQLImplicits with Serializable {
 
   /** @since 3.2.0 */
   implicit def newJavaEnumEncoder[A <: java.lang.Enum[_]: TypeTag]: Encoder[A] =
-    ScalaReflection.encoderFor[A]
+    EncoderTag.encoderFor[A]
 
   // Boxed primitives
 
@@ -243,15 +242,15 @@ trait EncoderImplicits extends LowPrioritySQLImplicits with Serializable {
    */
   @deprecated("Use newSequenceEncoder instead", "2.2.0")
   def newProductSeqEncoder[A <: Product: TypeTag]: Encoder[Seq[A]] =
-    newSeqEncoder(ScalaReflection.encoderFor[A])
+    newSeqEncoder(EncoderTag.encoderFor[A])
 
   /** @since 2.2.0 */
   implicit def newSequenceEncoder[T <: Seq[_]: TypeTag]: Encoder[T] =
-    ScalaReflection.encoderFor[T]
+    EncoderTag.encoderFor[T]
 
   // Maps
   /** @since 2.3.0 */
-  implicit def newMapEncoder[T <: Map[_, _]: TypeTag]: Encoder[T] = ScalaReflection.encoderFor[T]
+  implicit def newMapEncoder[T <: Map[_, _]: TypeTag]: Encoder[T] = EncoderTag.encoderFor[T]
 
   /**
    * Notice that we serialize `Set` to Catalyst array. The set property is only kept when
@@ -261,7 +260,7 @@ trait EncoderImplicits extends LowPrioritySQLImplicits with Serializable {
    *
    * @since 2.3.0
    */
-  implicit def newSetEncoder[T <: Set[_]: TypeTag]: Encoder[T] = ScalaReflection.encoderFor[T]
+  implicit def newSetEncoder[T <: Set[_]: TypeTag]: Encoder[T] = EncoderTag.encoderFor[T]
 
   // Arrays
   private def newArrayEncoder[E](
@@ -300,7 +299,7 @@ trait EncoderImplicits extends LowPrioritySQLImplicits with Serializable {
 
   /** @since 1.6.1 */
   implicit def newProductArrayEncoder[A <: Product: TypeTag]: Encoder[Array[A]] =
-    newArrayEncoder(ScalaReflection.encoderFor[A])
+    newArrayEncoder(EncoderTag.encoderFor[A])
 }
 
 /**

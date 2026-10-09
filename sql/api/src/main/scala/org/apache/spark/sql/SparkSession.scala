@@ -16,8 +16,8 @@
  */
 package org.apache.spark.sql
 
-import java.{lang, util}
 import java.io.Closeable
+import java.lang
 import java.net.URI
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
@@ -235,7 +235,7 @@ abstract class SparkSession extends Serializable with Closeable {
    * @since 2.0.0
    */
   @DeveloperApi
-  def createDataFrame(rows: util.List[Row], schema: StructType): DataFrame
+  def createDataFrame(rows: java.util.List[Row], schema: StructType): DataFrame
 
   /**
    * Applies a schema to a List of Java Beans.
@@ -245,7 +245,7 @@ abstract class SparkSession extends Serializable with Closeable {
    *
    * @since 1.6.0
    */
-  def createDataFrame(data: util.List[_], beanClass: Class[_]): DataFrame
+  def createDataFrame(data: java.util.List[_], beanClass: Class[_]): DataFrame
 
   /**
    * Creates a `DataFrame` from an RDD of Product (e.g. case classes, tuples).
@@ -398,7 +398,7 @@ abstract class SparkSession extends Serializable with Closeable {
    *
    * @since 2.0.0
    */
-  def createDataset[T: Encoder](data: util.List[T]): Dataset[T]
+  def createDataset[T: Encoder](data: java.util.List[T]): Dataset[T]
 
   /**
    * Creates a [[Dataset]] from an RDD of a given type. This method requires an encoder (to
@@ -525,7 +525,7 @@ abstract class SparkSession extends Serializable with Closeable {
    *   `array()`, `struct()`, in that case it is taken as is.
    * @since 3.4.0
    */
-  def sql(sqlText: String, args: util.Map[String, Any]): DataFrame = {
+  def sql(sqlText: String, args: java.util.Map[String, Any]): DataFrame = {
     sql(sqlText, args.asScala.toMap)
   }
 
@@ -899,7 +899,7 @@ object SparkSession extends SparkSessionCompanion {
     override def config(map: Map[String, Any]): this.type = super.config(map)
 
     /** @inheritdoc */
-    override def config(map: util.Map[String, Any]): this.type = super.config(map)
+    override def config(map: java.util.Map[String, Any]): this.type = super.config(map)
 
     /** @inheritdoc */
     override def config(conf: SparkConf): this.type = super.config(conf)
@@ -1224,7 +1224,7 @@ private[sql] abstract class SparkSessionBuilder {
    *
    * @since 3.4.0
    */
-  def config(map: util.Map[String, Any]): this.type = synchronized {
+  def config(map: java.util.Map[String, Any]): this.type = synchronized {
     config(map.asScala.toMap)
   }
 

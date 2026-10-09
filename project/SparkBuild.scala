@@ -170,14 +170,57 @@ object SparkBuild extends PomBuild {
 
   override val userPropertiesMap = System.getProperties.asScala.toMap
 
+  // Experimental: compile with Scala 3 by passing `-Dspark.scala3.version=<version>` (e.g. 3.3.6).
+  // The dependencies declared in the poms (scala-library, chill, ...) stay on the Scala 2.13
+  // artifacts, so Scala 3 consumes them through its 2.13 interop. Unset by default, in which case
+  // the build is unchanged.
+  val scala3Version: Option[String] = sys.props.get("spark.scala3.version").filter(_.nonEmpty)
+
   lazy val MavenCompile = config("m2r") extend(Compile)
   lazy val SbtCompile = config("sbt") extend(Compile)
 
-  lazy val sparkGenjavadocSettings: Seq[sbt.Def.Setting[_]] = GenJavadocPlugin.projectSettings ++ Seq(
-    scalacOptions ++= Seq(
-      "-P:genjavadoc:strictVisibility=true" // hide package private types
-    )
-  )
+  // The genjavadoc compiler plugin only exists for Scala 2.
+  lazy val sparkGenjavadocSettings: Seq[sbt.Def.Setting[_]] =
+    if (scala3Version.isDefined) {
+      Seq.empty
+    } else {
+      GenJavadocPlugin.projectSettings ++ Seq(
+        scalacOptions ++= Seq(
+          "-P:genjavadoc:strictVisibility=true" // hide package private types
+        )
+      )
+    }
+
+  // The scalac flags that pom.xml passes to scala-maven-plugin are Scala 2 specific, and they are
+  // read into the sbt build as well.
+  lazy val scala3Settings: Seq[sbt.Def.Setting[_]] = scala3Version.toSeq.flatMap { version =>
+    Seq(
+      scalaVersion := version,
+      scalacOptions ~= {
+        _.filterNot(opt => opt.startsWith("-Wconf:") || opt == "-Wunused:imports" ||
+          opt == "-explaintypes")
+      },
+      // Accept Scala 2 syntax that Scala 3 deprecated (e.g. `{ v: T => ... }`) with warnings.
+      scalacOptions += "-source:3.0-migration",
+      // The poms name the test libraries after Scala 2.13 (e.g. `scalatest_2.13`), whose macros,
+      // such as the one that provides the `Position` of `assert`, do not work in Scala 3.
+      libraryDependencies := libraryDependencies.value.map { m =>
+        if (m.organization == "org.scalatest" || m.organization == "org.scalatestplus" ||
+            m.organization == "org.scalacheck") {
+          m.withName(m.name.stripSuffix("_2.13") + "_3")
+        } else {
+          m
+        }
+      }
+    ) ++ {
+      // Opt-in with `-Dspark.scala3.rewrite=true`: the compiler rewrites the sources in place.
+      if (sys.props.get("spark.scala3.rewrite").contains("true")) {
+        Seq(scalacOptions += "-rewrite")
+      } else {
+        Seq.empty
+      }
+    }
+  }
 
   lazy val scalaStyleRules = Project("scalaStyleRules", file("scalastyle"))
     .settings(
@@ -263,7 +306,11 @@ object SparkBuild extends PomBuild {
     scalaStyleOnTest := cachedScalaStyle(Test).value
   )
 
-  lazy val compilerWarningSettings: Seq[sbt.Def.Setting[_]] = Seq(
+  // These are Scala 2.13 flags (-Wconf, -Wunused); Scala 3 uses different ones, so none are set
+  // when compiling with Scala 3.
+  lazy val compilerWarningSettings: Seq[sbt.Def.Setting[_]] = if (scala3Version.isDefined) {
+    Seq.empty
+  } else Seq(
     (Compile / scalacOptions) ++= {
       Seq(
         // replace -Xfatal-warnings with fine-grained configuration, since 2.13.2
@@ -297,6 +344,7 @@ object SparkBuild extends PomBuild {
   )
 
   lazy val sharedSettings = checkJavaVersionSettings ++
+                            scala3Settings ++
                             sparkGenjavadocSettings ++
                             compilerWarningSettings ++
                             enableScalaStyle ++ Seq(
@@ -1330,6 +1378,9 @@ object DependencyOverrides {
         SbtPomKeys.effectivePom.value.getProperties.get("slf4j.version").asInstanceOf[String]
       val xzVersion =
         SbtPomKeys.effectivePom.value.getProperties.get("xz.version").asInstanceOf[String]
+      // scalap only exists for Scala 2, so use the 2.13 version from the pom, not scalaVersion.
+      val scalapVersion =
+        SbtPomKeys.effectivePom.value.getProperties.get("scala.version").asInstanceOf[String]
       Seq(
         "com.google.guava" % "guava" % guavaVersion,
         "com.google.code.gson" % "gson" % gsonVersion,
@@ -1337,7 +1388,7 @@ object DependencyOverrides {
         "org.apache.avro" % "avro" % avroVersion,
         "org.slf4j" % "slf4j-api" % slf4jVersion,
         "org.tukaani" % "xz" % xzVersion,
-        "org.scala-lang" % "scalap" % scalaVersion.value
+        "org.scala-lang" % "scalap" % scalapVersion
       ) ++ jacksonDeps.key.value ++ grpcDeps.key.value ++ k8sClientDeps.key.value
     }
   )

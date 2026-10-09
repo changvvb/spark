@@ -16,8 +16,6 @@
  */
 package org.apache.spark.sql
 
-import java.util
-
 import scala.jdk.CollectionConverters._
 
 import org.apache.spark.annotation.Stable
@@ -112,7 +110,7 @@ abstract class DataFrameNaFunctions {
   def drop(minNonNulls: Int, cols: Seq[String]): DataFrame = drop(Option(minNonNulls), cols)
 
   private def toMinNonNulls(how: String): Option[Int] = {
-    how.toLowerCase(util.Locale.ROOT) match {
+    how.toLowerCase(java.util.Locale.ROOT) match {
       case "any" => None // No-Op. Do nothing.
       case "all" => Some(1)
       case _ => throw new IllegalArgumentException(s"how ($how) must be 'any' or 'all'")
@@ -233,7 +231,7 @@ abstract class DataFrameNaFunctions {
    *
    * @since 1.3.1
    */
-  def fill(valueMap: util.Map[String, Any]): DataFrame = fillMap(valueMap.asScala.toSeq)
+  def fill(valueMap: java.util.Map[String, Any]): DataFrame = fillMap(valueMap.asScala.toSeq)
 
   /**
    * (Scala-specific) Returns a new `DataFrame` that replaces null values.
@@ -282,7 +280,7 @@ abstract class DataFrameNaFunctions {
    *
    * @since 1.3.1
    */
-  def replace[T](col: String, replacement: util.Map[T, T]): DataFrame = {
+  def replace[T](col: String, replacement: java.util.Map[T, T]): DataFrame = {
     replace[T](col, replacement.asScala.toMap)
   }
 
@@ -308,7 +306,7 @@ abstract class DataFrameNaFunctions {
    *
    * @since 1.3.1
    */
-  def replace[T](cols: Array[String], replacement: util.Map[T, T]): DataFrame = {
+  def replace[T](cols: Array[String], replacement: java.util.Map[T, T]): DataFrame = {
     replace(cols.toImmutableArraySeq, replacement.asScala.toMap)
   }
 

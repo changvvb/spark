@@ -20,11 +20,12 @@ package org.apache.spark.sql
 import java.lang.reflect.Modifier
 
 import scala.reflect.{classTag, ClassTag}
-import scala.reflect.runtime.universe.TypeTag
 
-import org.apache.spark.sql.catalyst.{JavaTypeInference, ScalaReflection}
+import org.apache.spark.sql.catalyst.JavaTypeInference
 import org.apache.spark.sql.catalyst.encoders.{Codec, JavaSerializationCodec, KryoSerializationCodec, RowEncoder => SchemaInference}
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders._
+import org.apache.spark.sql.catalyst.encoders.EncoderTag
+import org.apache.spark.sql.catalyst.encoders.EncoderTag.TypeTag
 import org.apache.spark.sql.errors.ExecutionErrors
 import org.apache.spark.sql.types._
 
@@ -338,7 +339,7 @@ object Encoders {
    * An encoder for Scala's product type (tuples, case classes, etc).
    * @since 2.0.0
    */
-  def product[T <: Product: TypeTag]: Encoder[T] = ScalaReflection.encoderFor[T]
+  def product[T <: Product: TypeTag]: Encoder[T] = EncoderTag.encoderFor[T]
 
   /**
    * An encoder for Scala's primitive int type.
